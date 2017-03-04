@@ -56,11 +56,18 @@ abstract public class Absyn {
     showTree( tree.elsepart, spaces );
   }
 
+  static private void showTree( ElseExp tree, int spaces ) {
+    indent( spaces );
+    System.out.println( "ElseExp:" );
+    showTree( tree.input, spaces + SPACES );  
+  }
+
   static private void showTree( IntExp tree, int spaces ) {
     indent( spaces );
     System.out.println( "IntExp: " + tree.value ); 
   }
 
+  //Modified OpExp
   static private void showTree( OpExp tree, int spaces ) {
     indent( spaces );
     System.out.print( "OpExp:" ); 
@@ -71,10 +78,10 @@ abstract public class Absyn {
       case OpExp.MINUS:
         System.out.println( " - " );
         break;
-      case OpExp.TIMES:
+      case OpExp.MUL:
         System.out.println( " * " );
         break;
-      case OpExp.OVER:
+      case OpExp.DIV:
         System.out.println( " / " );
         break;
       case OpExp.EQ:
@@ -83,8 +90,23 @@ abstract public class Absyn {
       case OpExp.LT:
         System.out.println( " < " );
         break;
+      case OpExp.LTE:
+        System.out.println( " <= " );
+        break;
       case OpExp.GT:
         System.out.println( " > " );
+        break;
+      case OpExp.GTE:
+        System.out.println( " >= " );
+        break;
+      case OpExp.EQEQ:
+        System.out.println( " == " );
+        break;
+      case OpExp.NE:
+        System.out.println( " != " );
+        break;
+      case OpExp.EQUALS:
+        System.out.println( " < " );
         break;
       default:
         System.out.println( "Unrecognized operator at line " + tree.pos);
@@ -94,15 +116,9 @@ abstract public class Absyn {
     showTree( tree.right, spaces ); 
   }
 
-  static private void showTree( ReadExp tree, int spaces ) {
+  static private void showTree( ReturnExp tree, int spaces ) {
     indent( spaces );
-    System.out.println( "ReadExp:" );
-    showTree( tree.input, spaces + SPACES );  
-  }
-
-  static private void showTree( RepeatExp tree, int spaces ) {
-    indent( spaces );
-    System.out.println( "RepeatExp:" );
+    System.out.println( "ReturnExp:" );
     spaces += SPACES;
     showTree( tree.exps, spaces );
     showTree( tree.test, spaces ); 
@@ -113,9 +129,15 @@ abstract public class Absyn {
     System.out.println( "VarExp: " + tree.name );
   }
 
-  static private void showTree( WriteExp tree, int spaces ) {
+  static private void showTree( VoidExp tree, int spaces ) {
     indent( spaces );
-    System.out.println( "WriteExp:" );
+    System.out.println( "VoidExp:" );
+    showTree( tree.output, spaces + SPACES ); 
+  }
+
+  static private void showTree( WhileExp tree, int spaces ) {
+    indent( spaces );
+    System.out.println( "WhileExp:" );
     showTree( tree.output, spaces + SPACES ); 
   }
 
