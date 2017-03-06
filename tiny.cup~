@@ -108,27 +108,9 @@ decl	     ::= var_dec
 	       | fun_dec
 	       ;
 
-var_dec      ::= type_spec ID:i SEMI
-	       | type_spec ID:i LBRACKET NUM RBRACKET SEMI
+var_dec      ::= type_spec ID:i
+	       | type_spec ID:i LBRACKET NUM RBRACKET
 	       ;
-
-type_spec    ::= INT
-	       | VOID
-	       ;
-
-fun_dec	     ::= type_spec ID LPAREN params RPAREN cmpd_stmt 
-	       ;
-
-params	     ::= param_list 
-	       | VOID
-	       ;
-
-param_list   ::= param_list COMMA param
-	       | param
-	       ;
-
-param	     ::= type_spec ID
-	       | type_spec ID LBRACKET RBRACKET
 
 stmt         ::= if_stmt:i
                  {: RESULT = i; :}
