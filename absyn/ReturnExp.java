@@ -1,11 +1,9 @@
 package absyn;
 
 public class ReturnExp extends Exp {
-  public ExpList exps;
-  public Exp test;
-  public ReturnExp( int pos, ExpList exps, Exp test ) {
+  public Exp exp;
+  public ReturnExp( int pos, Exp exp ) {
     this.pos = pos;
-    this.exps = exps;
-    this.test = test;
+    this.test = exp;
   }
 }

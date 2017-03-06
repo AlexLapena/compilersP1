@@ -1,9 +1,11 @@
 package absyn;
 
 public class WhileExp extends Exp {
-  public Exp output;
-  public WhileExp( int pos, Exp output ) {
+  public Exp test;
+  public Exp body;
+  public WhileExp( int pos, Exp test, Exp body ) {
     this.pos = pos;
-    this.output = output;
+    this.test = test;
+    this.body = body;
   }
 }
