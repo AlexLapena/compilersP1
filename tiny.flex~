@@ -69,10 +69,10 @@ LineTerminator = \r|\n|\r\n
 WhiteSpace     = {LineTerminator} | [ \t\f]
    
 digit = 0|..|9
-num = {digit digit*}
+id = {digit digit*}
 
 letter = A|..|z|A|..|Z
-id = {letter letter*}
+num = {letter letter*}
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
