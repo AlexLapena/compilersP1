@@ -83,68 +83,92 @@ non terminal Exp exp, var, simple_exp, relop, add_exp, addop, term, factor, call
 
 /* ----------------------------Grammar Section-------------------- */
    
-program	     ::= stmt_seq:s
+program      ::= dec_list:s
                  {: RESULT = s;
                     System.out.println( "The abstract syntax tree is:" );
                     Absyn.showTree( RESULT, 0 );
                  :}
                ;
 
-stmt_seq     ::= stmt_seq:s1 SEMI decl:s2 
-                 {: ExpList t = s1;
+dec_list     ::= dec_list:s1 SEMI decl:s2 
+                 {: DecList t = s1;
                     while( t.tail != null )
                       t = t.tail;
-                    t.tail = new ExpList(s2, null);
+                    t.tail = new DecList(s2, null);
                     RESULT = s1;
                  :}
                | decl:s
-                 {: RESULT = new ExpList(s, null); :}
+                 {: RESULT = new DecList(s, null); :}
                | error SEMI decl:s
                  {: parser.report_error("invalid", null); 
-                    RESULT = new ExpList(s, null); 
+                    RESULT = new DecList(s, null); 
                  :}
                ;
 
-decl	     ::= var_dec
-	       | fun_dec
-	       ;
+decl       ::= var_dec:v
+     {: RESULT = v; :}
+         | fun_dec:f
+     {: RESULT = f; :}
+         ;
 
-var_dec      ::= type_spec ID:i SEMI
-	       | type_spec ID:i LBRACKET NUM RBRACKET SEMI
-	       ;
+var_dec      ::= type_spec:s ID:i SEMI
+     {: RESULT = new SimpleDec(sleft, s, i); :}
+         | type_spec:s ID:i LBRACKET NUM:n RBRACKET SEMI
+     {: int n2 =  Integer.parseInt(n);
+        RESULT = new ArrayDec( sleft, s, i, n2); 
+     :}
+         ;
 
-type_spec    ::= INT
-	       | VOID
-	       ;
+type_spec    ::= INT:i
+     {: int n =  Integer.parseInt(i);
+        RESULT = new IntExp(nleft, n); 
+     :}
+         | VOID:v
+     {: RESULT = new NilExp( vleft ) :}
+         ;
 
-fun_dec	     ::= type_spec ID LPAREN params RPAREN cmpd_stmt 
-	       ;
+fun_dec      ::= type_spec:t ID:i LPAREN params:p RPAREN cmpd_stmt:c
+     {: RESULT = new FunctionDec( tleft, t, i, p, c); :}
+         ;
 
-params	     ::= param_list 
-	       | VOID
-	       ;
+params       ::= param_list:p
+     {: RESULT = p; :}
+         | VOID:v
+     {: RESULT = new NilExp( vleft ) :}
+         ;
 
-param_list   ::= param_list COMMA param
-	       | param
-	       ;
+param_list   ::= param_list:p1 COMMA param:p2
+     {: VarDecList t = p1;
+        while( t.tail != null )
+                      t = t.tail;
+                    t.tail = new VarDecList(p2, null);
+                    RESULT = p1;
+                 :}
+         | param:p
+     {: RESULT = new VarDecList(p, null); :}
+         ;
 
-param	     ::= type_spec ID
-	       | type_spec ID LBRACKET RBRACKET
-	       ;
+param      ::= type_spec:t ID:i
+     {: RESULT = new SimpleDec( tleft, t, i); :}
+         | type_spec ID LBRACKET RBRACKET
+         ;
 
-cmpd_stmt    ::= LBRACE lcl_dec stmt_list RBRACE
-	       ;
+cmpd_stmt    ::= LBRACE lcl_dec:d stmt_list:s RBRACE
+     {: RESULT = new CompoundExp( dleft, d, s); :}
+         ;
 
-lcl_dec	     ::= lcl_dec var_dec
-	       |
-	       ;
+lcl_dec      ::= lcl_dec var_dec
+
+         |
+         ;
 
 stmt_list    ::= stmt_list stmt
-	       | 
-	       ;
+         | 
+         ;
 
-stmt         ::= exp_stmt
-	       | if_stmt:i
+stmt         ::= exp_stmt:e
+           {: RESULT = e; :}
+         | if_stmt:i
                  {: RESULT = i; :}
                | repeat_stmt:r
                  {: RESULT = r; :}
@@ -152,9 +176,10 @@ stmt         ::= exp_stmt
                  {: RESULT = a; :}
                ;
 
-exp_stmt     ::= exp SEMI
-	       | SEMI
-	       ;
+exp_stmt     ::= exp:e SEMI
+     {: RESULT = e; :}
+         | SEMI
+         ;
 
 if_stmt      ::= IF:i LPAREN exp:e RPAREN stmt:s
                  {: RESULT = new IfExp(ileft, e, s, null); :}
@@ -167,55 +192,55 @@ repeat_stmt  ::= WHILE:r LPAREN exp:e RPAREN stmt:s
                ;
 
 return_stmt  ::= RETURN SEMI
-	       | RETURN EXP SEMI
+         | RETURN EXP SEMI
                ;
 
 exp          ::= var EQUALS exp
                | simple_exp
                ;
 
-var	     ::= ID 
-	       | ID LBRACKET exp RBRACKET
-	       ;
+var      ::= ID 
+         | ID LBRACKET exp RBRACKET
+         ;
 
 simple_exp   ::= add_exp relop add_exp
                | add_exp
                ;
 
-relop	     ::= LTE
-	       | LT
-	       | GT
-	       | GTE
-	       | EQEQ
-	       | NE
-	       ;
+relop      ::= LTE
+         | LT
+         | GT
+         | GTE
+         | EQEQ
+         | NE
+         ;
 
-add_exp	     ::= add_exp addop term
-	       | term
-	       ;
+add_exp      ::= add_exp addop term
+         | term
+         ;
 
 addop        ::= PLUS
-	       | MINUS
-	       ;
+         | MINUS
+         ;
 
 term         ::= term mulop factor
-	       | factor
-	       ;
+         | factor
+         ;
 
 factor       ::= LPAREN exp:e RPAREN
                  {: RESULT = e; :}
                | var
                | call
-	       | NUM
+         | NUM
                ;
 
-call	     ::= ID LPARENT args RPAREN
-	       ;
+call       ::= ID LPARENT args RPAREN
+         ;
 
-args	     ::= args_list
-	       |
-	       ;
+args       ::= args_list
+         |
+         ;
 
 args_list    ::= args_list COMMA exp
-	       | exp
-	       ;
+         | exp
+         ;
