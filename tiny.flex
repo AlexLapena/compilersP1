@@ -67,12 +67,13 @@ import java_cup.runtime.*;
 
 LineTerminator = \r|\n|\r\n
 WhiteSpace     = {LineTerminator} | [ \t\f]
-   
-digit = 0|..|9
-num = {digit digit*}
 
+num = digit digit*
+id = letter letter* 
+
+digit = 0|..|9
 letter = A|..|z|A|..|Z
-id = {letter letter*}
+
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
