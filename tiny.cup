@@ -76,10 +76,14 @@ terminal LBRACKET, RBRACKET, LBRACE, RBRACE, LCOMMENT, RCOMMENT;
 terminal String ID, NUM;
 terminal ERROR;
    
-non terminal ExpList program, dec_list;
-non terminal Exp decl, var_dec, type_spec, fun_dec, params, param_list, param, cmpd_stmt, lcl_dec, stmt_list;
-non terminal Exp stmt, exp_stmt, if_stmt, repeat_stmt, return_stmt;
-non terminal Exp exp, var, simple_exp, relop, add_exp, mulop, addop, term, factor, call, args, args_list;   
+non terminal DecList program, dec_list;
+non terminal VarDecList param_list, lcl_dec, params;
+non terminal ExpList stmt_list, args_list;
+non terminal Dec fun_dec;
+non terminal Var var;
+non terminal VarDec var_dec, param;
+non terminal Exp decl, type_spec, cmpd_stmt, stmt, exp_stmt, if_stmt, repeat_stmt, return_stmt;
+non terminal Exp exp, simple_exp, relop, add_exp, mulop, addop, term, factor, call, args;   
 
 /* ----------------------------Grammar Section-------------------- */
    
