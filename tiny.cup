@@ -128,47 +128,58 @@ type_spec    ::= INT:i
          ;
 
 fun_dec      ::= type_spec:t ID:i LPAREN params:p RPAREN cmpd_stmt:c
-     {: RESULT = new FunctionDec( tleft, t, i, p, c); :}
-         ;
+     		 {: RESULT = new FunctionDec( tleft, t, i, p, c); :}
+               ;
 
 params       ::= param_list:p
-     {: RESULT = p; :}
-         | VOID:v
-     {: RESULT = new NilExp( vleft ) :}
-         ;
+     		 {: RESULT = p; :}
+               | VOID:v
+     		 {: RESULT = new NilExp( vleft ) :}
+               ;
 
 param_list   ::= param_list:p1 COMMA param:p2
-     {: VarDecList t = p1;
-        while( t.tail != null )
+     		 {: VarDecList t = p1;
+       		    while( t.tail != null )
                       t = t.tail;
                     t.tail = new VarDecList(p2, null);
                     RESULT = p1;
                  :}
-         | param:p
-     {: RESULT = new VarDecList(p, null); :}
-         ;
+               | param:p
+     		 {: RESULT = new VarDecList(p, null); :}
+               ;
 
-param      ::= type_spec:t ID:i
-     {: RESULT = new SimpleDec( tleft, t, i); :}
-         | type_spec ID LBRACKET RBRACKET
-         ;
+param        ::= type_spec:t ID:i
+     		 {: RESULT = new SimpleDec( tleft, t, i); :}
+               | type_spec ID LBRACKET RBRACKET
+               ;
 
 cmpd_stmt    ::= LBRACE lcl_dec:d stmt_list:s RBRACE
-     {: RESULT = new CompoundExp( dleft, d, s); :}
-         ;
+     		 {: RESULT = new CompoundExp( dleft, d, s); :}
+               ;
 
-lcl_dec      ::= lcl_dec var_dec
+lcl_dec      ::= lcl_dec:d1 var_dec:d2
+ 		 {: VarDecList t = d1;
+       		    while( t.tail != null )
+                      t = t.tail;
+                    t.tail = new VarDecList(d2, null);
+                    RESULT = d1;
+                 :}
+               |
+               ;
 
-         |
-         ;
-
-stmt_list    ::= stmt_list stmt
-         | 
-         ;
+stmt_list    ::= stmt_list:s1 stmt:s2
+		 {: ExpList t = s1;
+                    while( t.tail != null )
+                      t = t.tail;
+                    t.tail = new ExpList(s2, null);
+                    RESULT = s1;
+                 :}
+               | 
+               ;
 
 stmt         ::= exp_stmt:e
-           {: RESULT = e; :}
-         | if_stmt:i
+           	 {: RESULT = e; :}
+               | if_stmt:i
                  {: RESULT = i; :}
                | repeat_stmt:r
                  {: RESULT = r; :}
@@ -177,9 +188,9 @@ stmt         ::= exp_stmt:e
                ;
 
 exp_stmt     ::= exp:e SEMI
-     {: RESULT = e; :}
-         | SEMI
-         ;
+     	         {: RESULT = e; :}
+               | SEMI
+               ;
 
 if_stmt      ::= IF:i LPAREN exp:e RPAREN stmt:s
                  {: RESULT = new IfExp(ileft, e, s, null); :}
@@ -188,59 +199,97 @@ if_stmt      ::= IF:i LPAREN exp:e RPAREN stmt:s
                ;
 
 repeat_stmt  ::= WHILE:r LPAREN exp:e RPAREN stmt:s
-                 {: RESULT = new RepeatExp(rleft, s, e); :}
+                 {: RESULT = new WhileExp( rleft, e, s); :}
                ;
 
-return_stmt  ::= RETURN SEMI
-         | RETURN EXP SEMI
+return_stmt  ::= RETURN:r SEMI
+		 {: RESULT = new ReturnExp( rleft, null); :}
+               | RETURN:r EXP:e SEMI
+		 {: RESULT = new ReturnExp( rleft, e )
                ;
 
-exp          ::= var EQUALS exp
+exp          ::= var:v EQUALS exp:e
+		 {: RESULT = new AssignExp( vleft, v, e); :}
                | simple_exp
                ;
 
-var      ::= ID 
-         | ID LBRACKET exp RBRACKET
-         ;
-
-simple_exp   ::= add_exp relop add_exp
-               | add_exp
+var          ::= ID:i
+		 {: RESULT = new SimpleVar( ileft, i ); :}
+               | ID:i LBRACKET exp:e RBRACKET
+		 {: RESULT = new IndexVar( ileft, i, e ); :}
                ;
 
-relop      ::= LTE
-         | LT
-         | GT
-         | GTE
-         | EQEQ
-         | NE
-         ;
+simple_exp   ::= add_exp:a1 relop:r add_exp:a2
+		 {: RESULT = new OpExp( a1left, a1, r, a2 ); :}
+               | add_exp:a1
+		 {: RESULT = a1; :}
+               ;
 
-add_exp      ::= add_exp addop term
-         | term
-         ;
+relop        ::= LTE
+		 {: RESULT = opExp.LTE; :}
+               | LT
+		 {: RESULT = opExp.LT; :}
+               | GT
+		 {: RESULT = opExp.GT; :}
+               | GTE
+		 {: RESULT = opExp.GTE; :}
+               | EQEQ
+		 {: RESULT = opExp.EQEQ; :}
+               | NE
+		 {: RESULT = opExp.NE; :}
+               ;
+
+add_exp      ::= add_exp:a1 addop:a2 term:t
+		 {: RESULT = new OpExp( a1left, a1, a2, t ); :}
+               | term:t
+		 {: RESULT = t; :}
+               ;
 
 addop        ::= PLUS
-         | MINUS
-         ;
-
-term         ::= term mulop factor
-         | factor
-         ;
-
-factor       ::= LPAREN exp:e RPAREN
-                 {: RESULT = e; :}
-               | var
-               | call
-         | NUM
+		 {: RESULT = opExp.PLUS; :}
+               | MINUS
+		 {: RESULT = opExp.MINUS; :}
                ;
 
-call       ::= ID LPARENT args RPAREN
-         ;
+term         ::= term:t mulop:m factor:f
+		 {: RESULT = new OpExp( tleft, t, m, f ); :}
+               | factor:f
+		 {: RESULT = f; :}
+               ;
 
-args       ::= args_list
-         |
-         ;
+mulop	     ::= MUL
+		 {: RESULT = OpExp.MUL; :}
+	       | DIV
+		 {: RESULT = OpExp.DIV; :}
+	       ;
+factor       ::= LPAREN exp:e RPAREN
+                 {: RESULT = e; :}
+               | var:v
+                 {: RESULT = v; :}
+               | call:c
+                 {: RESULT = f; :}
+               | NUM:n
+		 {: int n2 = Integer.parseInt(n);
+		    RESULT = n2;
+		 :}
+               ;
 
-args_list    ::= args_list COMMA exp
-         | exp
-         ;
+call         ::= ID:i LPARENT args:a RPAREN
+		 {: RESULT = new CallExp( ileft, i, a ); :}
+               ;
+
+args         ::= args_list:l
+		 {: RESULT = l; :}
+               |
+               ;
+ 
+args_list    ::= args_list:l COMMA exp:e
+		 {: ExpList t = l;
+                    while( t.tail != null )
+                      t = t.tail;
+                    t.tail = new ExpList(e, null);
+                    RESULT = l;
+                 :}
+               | exp:e
+                 {: RESULT = new ExpList(e, null); :}
+               ;
